@@ -57,6 +57,7 @@ export default class Sentiment extends Component {
       this.setState({ isLoading: false });
     } catch (e) {
       alert(e);
+      console.log(e);
       this.setState({ isLoading: false });
     }
   };

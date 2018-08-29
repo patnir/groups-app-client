@@ -52,7 +52,9 @@ class App extends Component {
           <Navbar fluid collapseOnSelect>
             <Navbar.Header>
               <Navbar.Brand>
-                <Link to="/">Positivity Detector</Link>
+                <Link to={this.state.isAuthenticated ? "/sentiment" : "/"}>
+                  Positivity Detector
+                </Link>
               </Navbar.Brand>
               <Navbar.Toggle />
             </Navbar.Header>
