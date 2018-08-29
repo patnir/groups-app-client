@@ -27,7 +27,7 @@ export default ({ component: C, props: cProps, ...rest }) => {
           <C {...props} {...cProps} />
         ) : (
           <Redirect
-            to={redirect === "" || redirect === null ? "/sentiment" : redirect}
+            to={redirect === "" || redirect === null ? "/" : redirect}
           />
         )
       }

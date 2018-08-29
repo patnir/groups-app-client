@@ -5,6 +5,8 @@ import SentimentComprehend from "./Sentiment/Sentiment_Comprehend";
 import SentimentNPM from "./Sentiment/Sentiment_NPM";
 import SentimentTensorflow from "./Sentiment/Sentiment_Tensorflow";
 import MovieLookup from "./Sentiment/Movie_Lookup";
+import { Auth } from "aws-amplify";
+import { Link } from "react-router-dom";
 
 export default class Sentiment extends Component {
   constructor(props) {
@@ -26,7 +28,38 @@ export default class Sentiment extends Component {
     });
   };
 
+  renderLander() {
+    return (
+      <div className="Sentiment">
+        <div className="lander">
+          <h1>Positivty Detector</h1>
+          <p>
+            Use Sentiment Analysis and ML to check how positive are your words
+          </p>
+          <div>
+            <Link to="/login" className="btn btn-success btn-lg">
+              Login
+            </Link>
+            <Link to="/signup" className="btn btn-info btn-lg">
+              Signup
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   render() {
+    return (
+      <div>
+        {this.props.isAuthenticated
+          ? this.renderSentiment()
+          : this.renderLander()}
+      </div>
+    );
+  }
+
+  renderSentiment() {
     return (
       <div className="Sentiment">
         <PageHeader>

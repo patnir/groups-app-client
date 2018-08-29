@@ -20,9 +20,6 @@ export default class Login extends Component {
   }
 
   handleChange = event => {
-    console.log(event);
-    console.log(event.target.value);
-    console.log(this.state);
     this.setState({
       [event.target.id]: event.target.value
     });
