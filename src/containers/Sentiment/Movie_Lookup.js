@@ -46,7 +46,7 @@ export default class Sentiment extends Component {
 
     try {
       var response = await window.fetch(
-        "http://www.omdbapi.com/?t=" + curr_movie + "&apikey=6d706eee"
+        "https://www.omdbapi.com/?t=" + curr_movie + "&apikey=6d706eee"
       );
       result = await response.json();
 
