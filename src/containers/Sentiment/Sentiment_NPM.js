@@ -1,5 +1,14 @@
 import React, { Component } from "react";
-import { Alert, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
+import {
+  Alert,
+  FormGroup,
+  FormControl,
+  ControlLabel,
+  Grid,
+  Row,
+  Thumbnail,
+  Col
+} from "react-bootstrap";
 import LoaderButton from "../../components/LoaderButton";
 import SentimentAnalysis from "sentiment";
 
@@ -66,6 +75,19 @@ export default class Sentiment_Comprehend extends Component {
   render() {
     return (
       <form onSubmit={this.handleSentimentSubmit}>
+        <Grid>
+          <Row>
+            <Col xs={3} md={3} />
+            <Col xs={6} md={6}>
+              <Thumbnail
+                href="https://www.npmjs.com/package/sentiment"
+                alt="300x200"
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/2000px-Npm-logo.svg.png"
+              />
+            </Col>
+            <Col xs={3} md={3} />
+          </Row>
+        </Grid>
         <FormGroup controlId="sentimentText">
           <ControlLabel>Check Sentiment</ControlLabel>
           <FormControl
@@ -83,7 +105,7 @@ export default class Sentiment_Comprehend extends Component {
               }
             >
               <h4>{this.state.review} Review</h4>
-              <p>{JSON.stringify(this.state.npm_sentiment)}</p>
+              <p>Positivity Score: {this.state.npm_sentiment.score} </p>
             </Alert>
           ) : (
             <div />
