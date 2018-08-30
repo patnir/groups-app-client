@@ -7,11 +7,20 @@ import {
   Grid,
   Row,
   Col,
-  Thumbnail
+  Thumbnail,
+  Badge,
+  Panel
 } from "react-bootstrap";
 import LoaderButton from "../../components/LoaderButton";
 import nGram from "word-ngrams";
 import * as tf from "@tensorflow/tfjs";
+import { Card } from "antd";
+import "antd/dist/antd.css";
+
+const gridStyle = {
+  width: "33.3%",
+  textAlign: "center"
+};
 
 export default class Sentiment_Comprehend extends Component {
   constructor(props) {
@@ -31,7 +40,7 @@ export default class Sentiment_Comprehend extends Component {
     };
   }
 
-  getSentimentFromTensor(text) {
+  buildWordCountArray(text) {
     var sentiment = nGram.buildNGrams(text.text, 1);
     this.setState({
       tensor_sentiment: sentiment
@@ -54,8 +63,6 @@ export default class Sentiment_Comprehend extends Component {
       word_counts
     });
     console.log(word_counts);
-
-    return sentiment;
   }
 
   validateForm() {
@@ -72,43 +79,18 @@ export default class Sentiment_Comprehend extends Component {
     event.preventDefault();
 
     this.setState({ isLoading: true });
-    var res = "";
 
     try {
-      this.setState({
-        loadingText: "Calculating token frequency..."
-      });
-      var response = await window.fetch(
-        "https://s3.amazonaws.com/groups-app-upload/public/word_index/word_index.json"
-      );
-      var word_index = await response.json();
-
-      this.setState({
-        word_index,
-        loadingText: "Loading model..."
-      });
-
-      res = await this.getSentimentFromTensor({
+      await this.buildWordCountArray({
         text: this.state.sentimentText
       });
-
-      console.log(res);
-
-      console.log("loading model");
-
-      const model = await tf.loadModel(
-        "https://s3.amazonaws.com/groups-app-upload/public/model.json"
-      );
-      this.setState({
-        loadingText: "Making prediction..."
-      });
-
-      console.log(model);
 
       var currentTensor = tf.tensor2d([this.state.word_counts], [1, 500]);
       currentTensor.print();
 
-      var prediction = await model.predict(currentTensor).data();
+      var prediction = await this.state.currentModel
+        .predict(currentTensor)
+        .data();
       console.log(prediction[0]);
 
       var currentPrediction = prediction[0] * 100;
@@ -136,7 +118,7 @@ export default class Sentiment_Comprehend extends Component {
     }
   };
 
-  handleLoadSubmit = async event => {
+  handleModelLoad = async event => {
     this.setState({ isLoading: true });
     try {
       var response = await window.fetch(
@@ -144,18 +126,16 @@ export default class Sentiment_Comprehend extends Component {
       );
       var word_index = await response.json();
 
-      this.setState({
-        word_index
-      });
-
-      var model = await tf.loadModel(
+      var currentModel = await tf.loadModel(
         "https://s3.amazonaws.com/groups-app-upload/public/model.json"
       );
-      this.setState({
-        currentModel: model
-      });
 
-      this.setState({ isLoading: false, hasModelLoaded: true });
+      this.setState({
+        word_index,
+        currentModel,
+        isLoading: false,
+        hasModelLoaded: true
+      });
     } catch (e) {
       this.setState({ isLoading: false });
       console.log(e);
@@ -165,7 +145,11 @@ export default class Sentiment_Comprehend extends Component {
   renderModelInfo() {
     return (
       <div>
-        <h2>Keras Model Details</h2>
+        <Card title="Keras Model Details" style={{ margin: "20px" }}>
+          <Card.Grid style={gridStyle}>Vocab Size: 500</Card.Grid>
+          <Card.Grid style={gridStyle}>Layers: 2</Card.Grid>
+          <Card.Grid style={gridStyle}>Epochs: 7</Card.Grid>
+        </Card>
         <LoaderButton
           block
           bsStyle="primary"
@@ -174,7 +158,7 @@ export default class Sentiment_Comprehend extends Component {
           isLoading={this.state.isLoading}
           text="Load Keras Model"
           loadingText="Loading Keras Model"
-          onClick={this.handleLoadSubmit}
+          onClick={this.handleModelLoad}
         />
       </div>
     );
@@ -183,6 +167,7 @@ export default class Sentiment_Comprehend extends Component {
   renderSentimentDetectionForm() {
     return (
       <form onSubmit={this.handleSentimentSubmit}>
+        <Card title="Keras Model Loaded" style={{ margin: "20px" }} />
         <FormGroup controlId="sentimentText">
           <ControlLabel>Check Sentiment</ControlLabel>
           <FormControl
