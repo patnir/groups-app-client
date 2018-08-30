@@ -105,7 +105,7 @@ export default class Sentiment_Comprehend extends Component {
               }
             >
               <h4>{this.state.review} Review</h4>
-              <p>Positivity Score: {this.state.npm_sentiment.score} </p>
+              <p>Positivity Score: {this.state.npm_sentiment.score + 50} </p>
             </Alert>
           ) : (
             <div />

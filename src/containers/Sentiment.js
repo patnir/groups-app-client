@@ -5,7 +5,6 @@ import SentimentComprehend from "./Sentiment/Sentiment_Comprehend";
 import SentimentNPM from "./Sentiment/Sentiment_NPM";
 import SentimentTensorflow from "./Sentiment/Sentiment_Tensorflow";
 import MovieLookup from "./Sentiment/Movie_Lookup";
-import { Auth } from "aws-amplify";
 import { Link } from "react-router-dom";
 
 export default class Sentiment extends Component {

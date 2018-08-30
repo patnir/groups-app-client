@@ -4,10 +4,10 @@ import {
   FormGroup,
   FormControl,
   ControlLabel,
-  Image,
   Grid,
   Row,
-  Col
+  Col,
+  Thumbnail
 } from "react-bootstrap";
 import LoaderButton from "../../components/LoaderButton";
 import nGram from "word-ngrams";
@@ -24,7 +24,10 @@ export default class Sentiment_Comprehend extends Component {
       word_counts: null,
       review: "",
       currentPrediction: 0,
-      word_index: null
+      word_index: null,
+      loadingText: "",
+      hasModelLoaded: false,
+      currentModel: null
     };
   }
 
@@ -72,13 +75,17 @@ export default class Sentiment_Comprehend extends Component {
     var res = "";
 
     try {
+      this.setState({
+        loadingText: "Calculating token frequency..."
+      });
       var response = await window.fetch(
         "https://s3.amazonaws.com/groups-app-upload/public/word_index/word_index.json"
       );
       var word_index = await response.json();
 
       this.setState({
-        word_index
+        word_index,
+        loadingText: "Loading model..."
       });
 
       res = await this.getSentimentFromTensor({
@@ -88,9 +95,13 @@ export default class Sentiment_Comprehend extends Component {
       console.log(res);
 
       console.log("loading model");
+
       const model = await tf.loadModel(
         "https://s3.amazonaws.com/groups-app-upload/public/model.json"
       );
+      this.setState({
+        loadingText: "Making prediction..."
+      });
 
       console.log(model);
 
@@ -125,22 +136,53 @@ export default class Sentiment_Comprehend extends Component {
     }
   };
 
-  render() {
+  handleLoadSubmit = async event => {
+    this.setState({ isLoading: true });
+    try {
+      var response = await window.fetch(
+        "https://s3.amazonaws.com/groups-app-upload/public/word_index/word_index.json"
+      );
+      var word_index = await response.json();
+
+      this.setState({
+        word_index
+      });
+
+      var model = await tf.loadModel(
+        "https://s3.amazonaws.com/groups-app-upload/public/model.json"
+      );
+      this.setState({
+        currentModel: model
+      });
+
+      this.setState({ isLoading: false, hasModelLoaded: true });
+    } catch (e) {
+      this.setState({ isLoading: false });
+      console.log(e);
+    }
+  };
+
+  renderModelInfo() {
+    return (
+      <div>
+        <h2>Keras Model Details</h2>
+        <LoaderButton
+          block
+          bsStyle="primary"
+          bsSize="large"
+          type="submit"
+          isLoading={this.state.isLoading}
+          text="Load Keras Model"
+          loadingText="Loading Keras Model"
+          onClick={this.handleLoadSubmit}
+        />
+      </div>
+    );
+  }
+
+  renderSentimentDetectionForm() {
     return (
       <form onSubmit={this.handleSentimentSubmit}>
-        <Grid>
-          <Row>
-            <Col xs={3} md={3} />
-            <Col xs={6} md={6}>
-              <Image
-                href="https://js.tensorflow.org/tutorials/import-keras.html"
-                alt="300x200"
-                src="https://raw.githubusercontent.com/leriomaggio/deep-learning-keras-tensorflow/master/imgs/releases/keras-tensorflow-logo.jpg"
-              />
-            </Col>
-            <Col xs={3} md={3} />
-          </Row>
-        </Grid>
         <FormGroup controlId="sentimentText">
           <ControlLabel>Check Sentiment</ControlLabel>
           <FormControl
@@ -158,7 +200,10 @@ export default class Sentiment_Comprehend extends Component {
               }
             >
               <h4>{this.state.review} Review</h4>
-              <p>Positivity Score: {this.state.currentPrediction} / 100</p>
+              <p>
+                Positivity Score: {this.state.currentPrediction.toFixed(2)} /
+                100
+              </p>
             </Alert>
           ) : (
             <div />
@@ -172,9 +217,36 @@ export default class Sentiment_Comprehend extends Component {
           type="submit"
           isLoading={this.state.isLoading}
           text="Detect Sentiment"
-          loadingText="Detecting…"
+          loadingText={
+            this.state.loadingText !== ""
+              ? this.state.loadingText
+              : "Detecting Sentiment"
+          }
         />
       </form>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <Grid>
+          <Row>
+            <Col xs={3} md={3} />
+            <Col xs={6} md={6}>
+              <Thumbnail
+                href="https://js.tensorflow.org/tutorials/import-keras.html"
+                alt="300x200"
+                src="https://raw.githubusercontent.com/leriomaggio/deep-learning-keras-tensorflow/master/imgs/releases/keras-tensorflow-logo.jpg"
+              />
+            </Col>
+            <Col xs={3} md={3} />
+          </Row>
+        </Grid>
+        {this.state.hasModelLoaded
+          ? this.renderSentimentDetectionForm()
+          : this.renderModelInfo()}
+      </div>
     );
   }
 }
