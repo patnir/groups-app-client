@@ -167,7 +167,12 @@ export default class Sentiment_Comprehend extends Component {
   renderSentimentDetectionForm() {
     return (
       <form onSubmit={this.handleSentimentSubmit}>
-        <Card title="Keras Model Loaded" style={{ margin: "20px" }} />
+        <Panel>
+          <Panel.Title style={{ margin: "20px" }}>
+            Keras Model Loaded
+          </Panel.Title>
+        </Panel>
+
         <FormGroup controlId="sentimentText">
           <ControlLabel>Check Sentiment</ControlLabel>
           <FormControl
